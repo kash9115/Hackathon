@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './Chat.css';
+import { Link } from 'react-router-dom';
 
 const FilesSidebar = ({ isOpen, onToggle }) => {
   const [files, setFiles] = useState([]);
@@ -240,7 +241,7 @@ const Chat = () => {
       if (response.ok) {
         const data = await response.json();
         console.log("data", data)
-        setMessages(prev => [...prev, { type: 'bot', content: data.message }]);
+        setMessages(prev => [...prev, { type: 'bot', content: data.response }]);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -274,11 +275,14 @@ const Chat = () => {
       
       <div className={`chat-main ${isSidebarOpen ? 'sidebar-open' : ''}`}>
         <header className="chat-header">
-          <div className="app-logo1">
+          <div className="app-logo1" style={{"flex": ".8"}}>
             <div className="logo">
               <span className="logo-icon">L</span>
               LearnSmart AI
             </div>
+          </div>
+          <div>
+            <Link to="/code-editor" style={{"textDecoration": "None", "color": "white"}}>Code Editor</Link>
           </div>
           <div className="user-info">
             <span className="user-name">{userName}</span>
@@ -296,7 +300,7 @@ const Chat = () => {
           {console.log(messages)}
           {messages.map((message, index) => (
             <div key={index} className={`chat-message ${message.type}`}>
-              <div className="message-content">
+              <div className="message-content chat-screen-message-content" style={{"textAlign": "left"}}>
                 <ReactMarkdown>{message.content}</ReactMarkdown>
               </div>
             </div>
