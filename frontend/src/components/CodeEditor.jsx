@@ -31,7 +31,7 @@ const CodeEditor = () => {
       <header className="app-header">
         <div className="header-content">
           <Link to="/" className="logo">
-            LearnSmart AI
+            NexLearnix AI
           </Link>
           <nav className="nav-links">
             <Link to="/">Home</Link>

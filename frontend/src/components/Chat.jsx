@@ -277,8 +277,8 @@ const Chat = () => {
         <header className="chat-header">
           <div className="app-logo1" style={{"flex": ".8"}}>
             <div className="logo">
-              <span className="logo-icon">L</span>
-              LearnSmart AI
+              <span className="logo-icon">N</span>
+              NexLearnix AI
             </div>
           </div>
           <div>

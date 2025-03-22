@@ -173,50 +173,7 @@ def chat():
         
     return jsonify({
         'message': 'Message received',
-        'response': """# Flask React Project
-
-This is a full-stack application with Flask backend and React frontend.
-
-## Project Structure
-- `backend/` - Flask server code
-- `frontend/` - React application
-
-## Setup Instructions
-
-### Backend Setup
-1. Create a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-3. Run Flask server:
-```bash
-cd backend
-python app.py
-```
-
-### Frontend Setup
-1. Install dependencies:
-```bash
-cd frontend
-npm install
-```
-
-2. Run development server:
-```bash
-npm start
-```
-
-The application will be available at http://localhost:5000 
-
-![image](https://github.com/user-attachments/assets/1eee40cb-fbe0-40a2-a27a-95e0d7fe0ee0)
-
+        'response': """Welcome, eager learner! I'm excited to have you here on this first glimpse into our learning chatbot experience. Please note that while I'm still in my early stages and mainly here to showcase the UI and the look and feel of our app, every message you send lights up a spark of curiosity. Let's dive into this preview together and imagine all the knowledge yet to be discovered!
 """
     })
 

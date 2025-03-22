@@ -38,8 +38,8 @@ const Hero = () => {
     <div className="hero-container">
       <nav className="navbar">
         <div className="logo">
-          <span className="logo-icon">L</span>
-          LearnSmart AI
+          <span className="logo-icon">N</span>
+          NexLearnix AI
         </div>
         <div className="nav-links">
           <a href="#home" className="active">Home</a>
