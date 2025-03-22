@@ -148,6 +148,7 @@ const OnboardingForm = () => {
         body: JSON.stringify(finalFormData),
         credentials: 'include'
       });
+      navigate('/chat');
 
       if (response.ok) {
         const data = await response.json();
