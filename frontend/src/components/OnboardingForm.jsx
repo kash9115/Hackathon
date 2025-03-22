@@ -99,9 +99,26 @@ const OnboardingForm = () => {
         const data = await response.json();
         
         if (data.exists) {
-          // If user exists, navigate to chat
-          navigate('/chat');
-          return;
+          // If user exists, create a session and navigate to chat
+          const loginResponse = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              email: formData.email,
+              password: '' // Empty password for now
+            }),
+            credentials: 'include'
+          });
+
+          if (loginResponse.ok) {
+            const loginData = await loginResponse.json();
+            sessionStorage.setItem('userName', loginData.name);
+            sessionStorage.setItem('userEmail', loginData.email);
+            navigate('/chat');
+            return;
+          }
         }
       } catch (error) {
         console.error('Error checking email:', error);
@@ -133,7 +150,43 @@ const OnboardingForm = () => {
       });
 
       if (response.ok) {
-        navigate('/chat');
+        const data = await response.json();
+        
+        // Verify session was created
+        const sessionCheck = await fetch('/api/check-session', {
+          credentials: 'include'
+        });
+        
+        if (sessionCheck.ok) {
+          sessionStorage.setItem('userName', data.name);
+          sessionStorage.setItem('userEmail', data.email);
+          navigate('/chat');
+        } else {
+          // Try logging in explicitly if session check fails
+          const loginResponse = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              email: finalFormData.email,
+              password: '' // Empty password for now
+            }),
+            credentials: 'include'
+          });
+
+          if (loginResponse.ok) {
+            const loginData = await loginResponse.json();
+            sessionStorage.setItem('userName', loginData.name);
+            sessionStorage.setItem('userEmail', loginData.email);
+            navigate('/chat');
+          } else {
+            console.error('Failed to create session');
+          }
+        }
+      } else {
+        const error = await response.json();
+        console.error('Error:', error);
       }
     } catch (error) {
       console.error('Error:', error);

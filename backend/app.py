@@ -1,22 +1,26 @@
-from flask import Flask, send_from_directory, request, jsonify, session
+from flask import Flask, send_from_directory, request, jsonify
 from flask_cors import CORS
 from models import db, Profile
 import os
 import uuid
-from datetime import timedelta
 import sqlite3
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__, static_folder='../frontend/build')
-CORS(app, supports_credentials=True)
 
-# Configure SQLite database and session
+# Configure CORS
+CORS(app, resources={
+    r"/*": {
+        "origins": ["http://localhost:3000", "https://your-production-domain.com"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
+
+# Configure SQLite database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///profiles.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['SECRET_KEY'] = 'your-secret-key-here'  # Change this to a secure secret key
-app.config['SESSION_COOKIE_SECURE'] = True
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 
 # Initialize database
 db.init_app(app)
@@ -35,21 +39,18 @@ def init_db():
     c = conn.cursor()
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            profession TEXT NOT NULL,
-            designation TEXT NOT NULL
+            email TEXT PRIMARY KEY,
+            name TEXT
         )
     ''')
     c.execute('''
         CREATE TABLE IF NOT EXISTS user_files (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT NOT NULL,
-            original_filename TEXT NOT NULL,
-            stored_filename TEXT NOT NULL,
+            email TEXT,
+            original_filename TEXT,
+            stored_filename TEXT,
             upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (email) REFERENCES users(email)
+            FOREIGN KEY (email) REFERENCES users (email)
         )
     ''')
     conn.commit()
@@ -119,42 +120,35 @@ def create_profile():
     c = conn.cursor()
     
     try:
-        c.execute('''
-            INSERT INTO users (name, email, profession, designation)
-            VALUES (?, ?, ?, ?)
-        ''', (data['name'], data['email'], data['profession'], data['designation']))
+        c.execute('INSERT INTO users (name, email) VALUES (?, ?)',
+                 (data['name'], data['email']))
         conn.commit()
-        return jsonify({'message': 'Profile created successfully'})
-    except sqlite3.IntegrityError:
-        return jsonify({'error': 'Email already exists'}), 409
+        return jsonify({
+            'message': 'Profile created successfully',
+            'email': data['email'],
+            'name': data['name']
+        })
+    # except sqlite3.IntegrityError:
+    #     return jsonify({'error': 'Email already exists'}), 409
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
 
-@app.route('/api/check-session')
-def check_session():
-    if 'user_email' in session:
-        return jsonify({
-            'email': session['user_email'],
-            'user_id': session['user_id']
-        })
-    return jsonify({'error': 'No active session'}), 401
-
-@app.route('/api/logout')
-def logout():
-    session.clear()
-    return jsonify({'message': 'Logged out successfully'})
-
 @app.route('/api/chat', methods=["POST"])
 def chat():
-    if 'user_email' in session:
-        print("session", session)
-        return jsonify({
-            'message': 'Chat session active',
-            'user_email': session['user_email']
-        })
-    return jsonify({'error': 'No active session'}), 401
+    data = request.json
+    print("data", data)
+    email = data.get('email')
+    message = data.get('message')
+    
+    # if not email or not message:
+    #     return jsonify({'error': 'Email and message are required'}), 400
+        
+    return jsonify({
+        'message': 'Message received',
+        'response': 'This is a sample response'
+    })
 
 @app.route('/api/clear-database', methods=['POST'])
 def clear_database():
@@ -191,10 +185,11 @@ def upload_file():
     if 'files[]' not in request.files:
         return jsonify({'error': 'No files uploaded'}), 400
     
-    if 'user_email' not in session:
-        return jsonify({'error': 'No active session'}), 401
+    # email = request.form.get('email')
+    email = "hritikgupta7080@gmail.com"
+    # if not email:
+    #     return jsonify({'error': 'Email is required'}), 400
 
-    user_email = session['user_email']
     uploaded_files = request.files.getlist('files[]')
     
     if not uploaded_files or all(file.filename == '' for file in uploaded_files):
@@ -205,10 +200,11 @@ def upload_file():
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
         
+        print("uploaded_files", uploaded_files)
         for file in uploaded_files:
             original_filename = secure_filename(file.filename)
             file_extension = os.path.splitext(original_filename)[1]
-            stored_filename = f"{original_filename.rsplit('.', 1)[0]}_{user_email}{file_extension}"
+            stored_filename = f"{original_filename.rsplit('.', 1)[0]}_{email}{file_extension}"
             
             # Save file
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], stored_filename)
@@ -218,7 +214,7 @@ def upload_file():
             c.execute('''
                 INSERT INTO user_files (email, original_filename, stored_filename)
                 VALUES (?, ?, ?)
-            ''', (user_email, original_filename, stored_filename))
+            ''', (email, original_filename, stored_filename))
             
             uploaded_filenames.append(original_filename)
         
@@ -234,10 +230,9 @@ def upload_file():
 
 @app.route('/api/user-files', methods=['GET'])
 def get_user_files():
-    if 'user_email' not in session:
-        return jsonify({'error': 'No active session'}), 401
-    
-    user_email = session['user_email']
+    email = "hritikgupta7080@gmail.com"
+    # if not email:
+    #     return jsonify({'error': 'Email is required'}), 400
     
     try:
         conn = sqlite3.connect('users.db')
@@ -247,7 +242,7 @@ def get_user_files():
             FROM user_files
             WHERE email = ?
             ORDER BY upload_date DESC
-        ''', (user_email,))
+        ''', (email,))
         
         files = [{
             'originalName': row[0],

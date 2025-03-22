@@ -19,7 +19,9 @@ const ProfileForm = () => {
 
   useEffect(() => {
     if (formData.profession) {
-      fetch(`/api/designations/${formData.profession}`)
+      fetch(`/api/designations/${formData.profession}`, {
+        credentials: 'include'
+      })
         .then((res) => res.json())
         .then((data) => setDesignations(data))
         .catch((error) => console.error('Error fetching designations:', error));
@@ -56,6 +58,7 @@ const ProfileForm = () => {
       const response = await fetch('/api/profile', {
         method: 'POST',
         body: formDataToSend,
+        credentials: 'include'
       });
 
       const data = await response.json();
@@ -127,38 +130,39 @@ const ProfileForm = () => {
           </select>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="designation">Designation:</label>
-          <select
-            id="designation"
-            name="designation"
-            value={formData.designation}
-            onChange={handleInputChange}
-            required
-            disabled={!formData.profession}
-          >
-            <option value="">Select Designation</option>
-            {designations.map((desig) => (
-              <option key={desig} value={desig}>
-                {desig}
-              </option>
-            ))}
-          </select>
-        </div>
+        {formData.profession && (
+          <div className="form-group">
+            <label htmlFor="designation">Designation:</label>
+            <select
+              id="designation"
+              name="designation"
+              value={formData.designation}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="">Select Designation</option>
+              {designations.map((desig) => (
+                <option key={desig} value={desig}>
+                  {desig}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="form-group">
-          <label htmlFor="document">Upload Document (PDF):</label>
+          <label htmlFor="document">Upload Document:</label>
           <input
             type="file"
             id="document"
             name="document"
-            accept=".pdf"
             onChange={handleFileChange}
-            required
           />
         </div>
 
-        <button type="submit">Submit</button>
+        <button type="submit" className="submit-button">
+          Create Profile
+        </button>
 
         {submitStatus.message && (
           <div className={`status-message ${submitStatus.type}`}>
