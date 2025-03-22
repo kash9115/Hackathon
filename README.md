@@ -39,3 +39,5 @@ npm start
 ```
 
 The application will be available at http://localhost:5000 
+
+![image](https://github.com/user-attachments/assets/1eee40cb-fbe0-40a2-a27a-95e0d7fe0ee0)
