@@ -17,6 +17,10 @@
 
 }
 
+.cta-section{
+  display: none;
+}
+
 .feature-text h3{
     margin-top: 0;
 }

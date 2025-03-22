@@ -13,11 +13,11 @@
 }
 
 .chat-main.sidebar-open {
-  margin-left: 300px;
+  /* margin-left: 300px; */
 }
 
 .files-sidebar {
-  position: fixed;
+  /* position: fixed; */
   left: 0;
   top: 0;
   bottom: 0;
